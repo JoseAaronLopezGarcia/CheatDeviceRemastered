@@ -126,9 +126,9 @@ int debugPrintf(const char *text, ...); // for testing only
 
 ////////////////////////////////////
 
-void (* SetActorSkinTo)(int ped_obj, const char *name); // name must be lower case!!
-void (* LoadAllModelsNow)(char x);
-void (* RefreshActorSkin)(int ped_obj);
+extern void (* SetActorSkinTo)(int ped_obj, const char *name); // name must be lower case!!
+extern void (* LoadAllModelsNow)(char x);
+extern void (* RefreshActorSkin)(int ped_obj);
 
 ////////////////////////////////////
 

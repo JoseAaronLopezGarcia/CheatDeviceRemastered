@@ -2686,7 +2686,6 @@ static int editor_draw() {
   char buffer_top0[128]; // top option
   char buffer_top1[128]; // top option 2
   
-  void *(* func)();
   const char *val;
   
   /// color sample box
@@ -3116,7 +3115,7 @@ static int editor_draw() {
       drawString(_t(editor_curmenu[i].name), ALIGN_FREE, FONT_DIALOG, SIZE_NORMAL, SHADOW_OFF, x, y, COLOR_TEMP);
       
       if( editor_curmenu[i].value != 0 ) { // use the function to take care of everything    
-        func = editor_curmenu[i].value;
+        void *(* func)(int, int, int, int, int) = editor_curmenu[i].value;
         val = func(FUNC_GET_STRING, 0, editor_base_adr, editor_curmenu[i].address+editor_base_adr, (int)editor_curmenu[i].steps);
         snprintf(buffer, sizeof(buffer), "%s%s", val, editor_curmenu[i].postfix );
         
@@ -3385,7 +3384,6 @@ static int editor_ctrl() {
   int editor_mode = 0; // default 
   #endif
   
-  void (* func)();
   static int keypress;
   
   if( editor_selector ) { // top menu
@@ -3625,7 +3623,7 @@ static int editor_ctrl() {
             keypress = PSP_CTRL_LEFT;
           if( hold_buttons & PSP_CTRL_RIGHT ) 
             keypress = PSP_CTRL_RIGHT;
-          func = (void *)(editor_curmenu[editor_selection_val].value);
+          void *(* func)(int, int, int, int, int, int) = (void *)(editor_curmenu[editor_selection_val].value);
           func(FUNC_CHANGE_VALUE, keypress, editor_base_adr, editor_curmenu[editor_selection_val].address+editor_base_adr, (int)editor_curmenu[editor_selection_val].steps, editor_block_current);
           editor_wasused++;
           
@@ -5914,7 +5912,8 @@ int menu_draw(const Menu_pack *menu_list, int menu_max) {
   static u32 color;
   static int i;
   static float x, y;
-  void *(* surrent_get)();
+  void *(* surrent_get)(int);
+  void *(* surrent_get2)(int, int);
   
   /// title
   snprintf(buffer, sizeof(buffer), _t("CheatDevice Remastered %s by Freakler"), VERSION);
@@ -5995,7 +5994,8 @@ int menu_draw(const Menu_pack *menu_list, int menu_max) {
                   
         case MENU_CATEGORY: 
           color = COLOR_CATEGORY;
-          val = surrent_get(FUNC_GET_STRING, menu_list[i].cat);
+          surrent_get2 = (void*)surrent_get;
+          val = surrent_get2(FUNC_GET_STRING, menu_list[i].cat);
           break;
           
         case MENU_FUNCTION: case MENU_CONFIG: 
@@ -6073,7 +6073,7 @@ int menu_draw(const Menu_pack *menu_list, int menu_max) {
 			#ifdef LANG
             if (menu_list[i].conf_id == 0x1FB9) // Replace with author name
             {
-              void *(* func)() = (void *)(menu_list[i].value);
+              void *(* func)(int, int, int, int) = (void *)(menu_list[i].value);
               int currSelectedLangID = (int)func(FUNC_GET_VALUE, 0, 0, 0);
               snprintf(desc_formatted, sizeof(desc_formatted), "> %s %s", _t("Translation made by"), main_file_table->lang_files[currSelectedLangID]->author_name);
             }
@@ -6249,7 +6249,7 @@ int menu_ctrl(const Menu_pack *menu_list, int menu_max) { // for blocked buttons
     }
 
     if( keypress > -2 ) {
-      void (* func)();
+      void (* func)(u32, u32);
       switch( menu_list[menu_sel].type ) {
         
         case MENU_FUNCTION: case MENU_CDR_HEX: case MENU_CDR_EDITOR: case MENU_CDR_FILES:
@@ -6269,7 +6269,7 @@ int menu_ctrl(const Menu_pack *menu_list, int menu_max) { // for blocked buttons
             
         case MENU_CONFIG:
           func = (void *)(menu_list[menu_sel].value);
-          func( menu_list, menu_max );
+          func( (u32)menu_list, menu_max );
           break;
       }
     }
@@ -6280,7 +6280,7 @@ int menu_ctrl(const Menu_pack *menu_list, int menu_max) { // for blocked buttons
 
 int menu_check(const Menu_pack *menu_list, int menu_max) {
   static int i;
-  void *(* surrent_get)();
+  void *(* surrent_get)(int);
   
   for( i=0; i < menu_max; i++ ) {
     if( menu_list[i].cat != CAT_ALIAS && (((LCS && menu_list[i].LC == TRUE) || (VCS && menu_list[i].VC == TRUE)) && ((!multiplayer && menu_list[i].SP == TRUE) || (multiplayer && menu_list[i].MP == TRUE))) ) { // do not check anything for copies of already exisitng cheat functions & disabled
@@ -6300,7 +6300,7 @@ int menu_check(const Menu_pack *menu_list, int menu_max) {
 
 int menu_apply(const Menu_pack *menu_list, int menu_max) {
   static int i;
-  void *(* surrent_get)();
+  void *(* surrent_get)(int);
   
   for( i=0; i < menu_max; i++ ) {
     if( menu_list[i].cat != CAT_ALIAS && (((LCS && menu_list[i].LC == TRUE) || (VCS && menu_list[i].VC == TRUE)) && ((!multiplayer && menu_list[i].SP == TRUE) || (multiplayer && menu_list[i].MP == TRUE))) ) { // do not apply anything for copies of already exisitng cheat functions & disabled
@@ -6636,7 +6636,7 @@ static void CheckModules() { // PPSSPP only
 }
 
 
-int OnModuleStart(SceModule2 *mod) {
+int OnModuleStart(SceModule *mod) {
   const char *modname = mod->modname;
   
   if( strcmp(modname, "GTA3") == 0 ) {
@@ -6756,4 +6756,8 @@ void free_alloc_mem_cdr()
   langTableFree(main_lang_table);
   langFileTableFree(main_file_table);
   #endif
+}
+
+void _exit(){
+  sceKernelExitGame();
 }

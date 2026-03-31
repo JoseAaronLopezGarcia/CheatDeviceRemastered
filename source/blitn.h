@@ -88,44 +88,6 @@ typedef struct menu_blit_box
   ScePspFVector2 size;
 } menu_blit_box;
 
-/// box
-char *(*SetBoxColor)(char *param_1,char alpha,char red,char green,char blue);
-float *(*SetBoxCoords)(float param_1, float param_2, float param_3, float param_4, float *param_5);
-void (*DrawRect)(float *param_1,unsigned int *param_2,char param_3);
-
-      
-/// string
-void (*PrintString_LCS)(float X, float Y, wchar_t* text, int* unknown);
-void (*PrintString_VCS)(wchar_t* text, int x, int y);
-void (*SetRightJustifyOn)();
-void (*SetRightJustifyOff)();
-void (*SetCentreOff)();
-void (*SetCentreOn)();
-void (*SetJustifyOn)();
-void (*SetJustifyOff)();
-void (*SetColor)(u32* color);
-void (*SetBackgroundColor)(u32* color);
-void (*SetFontStyle)(short style);
-void (*SetDropShadowPosition)(short bool_box);
-void (*SetDropColor)(char* rgba);
-void (*SetScale_LCS)(float width, float height);
-void (*SetScale_VCS)(float scale);
-void (*SetBackGroundOnlyTextOn)();
-void (*SetBackGroundOnlyTextOff)();
-void (*SetPropOn)();
-void (*SetPropOff)();
-void (*SetBackgroundOn)();
-void (*SetBackgroundOff)();
-void (*SetTextOriginPoint)(int origin);
-void (*SetTextSpaceing)(int option);
-void (*SetTextBounds)(float* array);
-void (*ResetFontStyling)();
-void (*SetRightJustifyWrap)(float x);
-void (*SetWrapx)(float x);
-void (*SetSlant)(float param_1);
-void (*SetCentreSize)(float param_1);
-void (*SetSlantRefPoint)(float param_1, float param_2);
-
 
 /// colors (0xAABBGGRR)
 #define RED     0xFF0000FF

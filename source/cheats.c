@@ -285,6 +285,83 @@ u32 render                    = -1;
 u32 ptr_memory_main           = -1;
 
 
+int (* GetPPLAYER)();
+int (* GetPOBJ)();
+int (* GetPCAR)();
+
+void (* SetNextWeather)(short weathercode);
+void (* SetWeatherNow)(short weathercode);
+void (* ReleaseWeather)(void);
+
+void (* TaskCharWith)(unsigned int ped, int val, unsigned int object);
+void (* WarpPedIntoVehicle)(int ped, int vehicle); // FUN_001b90ec_warpPedIntoVehicle(int ped, int veh) (has more attributes in VCS!!!!)
+void (* WarpPedIntoVehicleAsPassenger)(int ped, int vehicle, int seat); // FUN_001b9470_warpPedIntoVehicleAsPassenger(int ped, int veh, int seat)
+void (* RequestModel)(unsigned int model_id, unsigned int param_2); // , unsigned int param_3, unsigned int param_4, unsigned int param_5);
+int (* GiveWeaponAndAmmo)(int ped_obj, int param_2, unsigned int ammo); // , unsigned int param_4, unsigned int param_5);
+void (* SetActorSkinTo)(int ped_obj, const char *name); // name must be lower case!!
+void (* LoadAllModelsNow)(char x);
+void (* RefreshActorSkin)(int ped_obj);
+void (* TaskDuckLCS)(int ped_obj);
+void (* TaskDuckVCS)(int ped_obj, int duration, char x);
+void (* TaskUnDuck)(int ped_obj, char x);
+
+int (* SetWantedLevel)(int pplayer, int stars);
+int (* SetMaxWantedLevel)(int stars);
+
+int (* StartNewScript)(int ip);
+
+void (* TankControl)(int handle);
+void (* BlowupVehiclesInPath)(int handle);
+
+void (* DoHoverSuspensionRatios)(int handle);
+
+int (* IsPlayerOnAMission)(void);
+void (* SetBridgeState)(int state);
+
+int (* LoadStringFromGXT)(int gxt_adr,char *string,int param_3,int param_4,int param_5, int param_6,int param_7,int param_8);
+int LoadStringFromGXT_patched(int gxt_adr,char *string, int param_3, int param_4, int param_5, int param_6,int param_7,int param_8);
+
+int (* GetTEST)(); // for testing
+
+/// Hijacks
+int (* buttonsToAction)(void *a1);
+int buttonsToActionPatched(void *a1);
+
+void (* cWorldStream_Render)(void *this, int mode);
+void cWorldStream_Render_Patched(void *this, int mode);
+
+void (* FUN_002c22a0)(int param_1);
+void FUN_002c22a0_patched(int param_1);
+
+void (* FUN_002db0c0)(int param_1);
+void FUN_002db0c0_patched(int param_1);
+
+int (*_checkCustomTracksReady)(int param_1);
+int _checkCustomTracksReady_patched(int param_1);
+
+unsigned int (*loadSplashScreen)(int* x,int y,int z, int a, int b);
+unsigned int loadSplashScreen_patched(int* x,int y,int z, int a, int b);
+
+void (*Loadscreen)(char * string1, char * string2, char *txdname, unsigned int param_4);
+void Loadscreen_patched(char * string1, char * string2, char *txdname, unsigned int param_4);
+
+void (*DrawLoadingBar)(float param_1);
+void DrawLoadingBar_patched(float param_1);
+
+void (*UpdatePosition)(int handle);
+void UpdatePosition_patched(int handle);
+
+//#ifdef SWIM
+int (*FUN_00109dac_CWaterLevel_GetWaterLevel)(float param_1,float param_2,float *param_3);
+int (*FUN_000e7d70_CCam_IsTargetInWater)(int param_1);
+int FUN_000e7d70_CCam_IsTargetInWater_patched(int param_1);
+void (*FUN_001a8d9c_CPed_ProcessBuoyancy)(int param_1);
+void *FUN_001a8d9c_CPed_ProcessBuoyancy_patched(int param_1);
+//#endif
+
+// DEBUG
+void (*debugprint)(const char *text, ...); 
+
 /// savedataeditor - scraped since not working on emu and save space
 #ifdef SAVEDITOR 
 u32 savedatakey  = -1;
@@ -5571,7 +5648,7 @@ void load_defaults(const Menu_pack *menu_list, int menu_max) { // set all cheats
   #endif  
   
   static int i;
-  void (* func)();
+  void (* func)(int, char, char, u32);
   for( i=0; i < menu_max; i++ ) {
     func = (void *)(menu_list[i].value);
     if( menu_list[i].conf_id != 0 && menu_list[i].def_stat != -1 ) {
@@ -9742,7 +9819,7 @@ void *world_liftcontrol(int calltype, int keypress, int defaultstatus, int defau
  **************************************************************************************************************************************/
 void *world_realtimeclock(int calltype, int keypress, int defaultstatus) {
   static int status;
-  static pspTime timetest;
+  static ScePspDateTime timetest;
   
   switch( calltype ) {
     case FUNC_GET_STATUS: 
@@ -9769,7 +9846,7 @@ void *world_realtimeclock(int calltype, int keypress, int defaultstatus) {
       } else if( keypress == PSP_CTRL_SQUARE ) { // SQUARE
         /// Set PSP SystemTime as Gametime
         sceRtcGetCurrentClockLocalTime(&timetest); // https://github.com/pspdev/pspsdk/blob/master/src/rtc/psprtc.h
-        setClockTime((char)timetest.hour, (char)timetest.minutes, (char)timetest.seconds);  
+        setClockTime((char)timetest.hour, (char)timetest.minute, (char)timetest.second);  
 
       } else if( keypress == PSP_CTRL_TRIANGLE ) {
         //int gp_tmp = (LCS ? 0 : gp);

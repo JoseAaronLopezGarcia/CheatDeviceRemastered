@@ -50,7 +50,7 @@
   #define _tcsicmp  stricmp
   #define _tcslen   strlen
   #define _tcsncpy  strncpy
-  #define _tcsnicmp strnicmp
+  #define _tcsnicmp strncasecmp
   #define _tcsrchr  strrchr
   #define _tcstol   strtol
   #define _tcstod   strtod

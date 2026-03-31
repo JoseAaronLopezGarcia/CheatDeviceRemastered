@@ -281,7 +281,7 @@ int writeCategoryHeader(SceUID file, char *magic) {
 
 int workBlock(SceUID file, const Menu_pack *menu_list, int menu_max, int identifier, int mode) {
   int i, ret, counter;
-  void *(* func)();
+  void *(* func)(int, int);
   
   for( i = 0, counter = 0; i < menu_max; i++ ) {
     func = menu_list[i].value;
@@ -290,7 +290,7 @@ int workBlock(SceUID file, const Menu_pack *menu_list, int menu_max, int identif
         //logPrintf("id 0x%04X", menu_list[i].conf_id);
         
         if( mode == 1 ) { /// "FUNC_GET_VALUE"
-          ret = (int)func(FUNC_GET_VALUE); 
+          ret = (int)func(FUNC_GET_VALUE, 0); 
           //logPrintf("ret = 0x%08X", ret);
           if( ret > 0 ) 
             writeValue(file, menu_list[i].conf_id, ret);  // only positive values will be saved (if 0 its default and doesn't need to be saved in ini) ...
@@ -536,7 +536,7 @@ int load_config(const Menu_pack *menu_list, int menu_max) { // loads menu defaul
   
   int i, ret;
   static int keypress = -2;
-  void (* func)();
+  void (* func)(int, int, int, int);
   
   SceUID file = sceIoOpen(config, PSP_O_RDONLY, 0777);
   if( file < 0 ) {
@@ -568,14 +568,14 @@ int load_config(const Menu_pack *menu_list, int menu_max) { // loads menu defaul
         if( (menu_list[i].conf_id >> 12) == 2 ) {
           if( flag_coll_cats ) { // only set categories if they are set to be able to collapse/expandable
             ret = getValueFromConfigFor(file, LCS ? "LCAT" : "VCAT", menu_list[i].conf_id);
-            func(FUNC_SET, menu_list[i].cat, ret < 0 ? menu_list[i].def_stat : ret); // set def_stat from Menu_pack if not found in config
+            func(FUNC_SET, menu_list[i].cat, ret < 0 ? menu_list[i].def_stat : ret, 0); // set def_stat from Menu_pack if not found in config
           }
         }
         
         /// CHEAT DEVICE SETTINGS ///////////////
         if( (menu_list[i].conf_id >> 12) == 3 ) {
           ret = getValueFromConfigFor(file, "SETT", menu_list[i].conf_id);
-          func(FUNC_SET, keypress, ret < 0 ? menu_list[i].def_stat : ret);
+          func(FUNC_SET, keypress, ret < 0 ? menu_list[i].def_stat : ret, 0);
         }
         
         
@@ -588,7 +588,7 @@ int load_config(const Menu_pack *menu_list, int menu_max) { // loads menu defaul
           ret = getValueFromConfigFor(file, LCS ? "LEDT" : "VEDT", menu_list[i].conf_id);
           if( ret == -1 ) // value not found.. 
             ret = 0; // ..pass zero to set as default for those
-          func(FUNC_SET, ret);
+          func(FUNC_SET, ret, 0, 0);
         }
       }
     }
